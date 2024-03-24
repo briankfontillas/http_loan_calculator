@@ -30,9 +30,13 @@ const SERVER = HTTP.createServer((req, res) => {
   let path = req.url;
 
   if (path !== '/favicon.ico') {
+    let content = loanMessage(getParams(path))
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-    res.write(loanMessage(getParams(path)));
+    res.write(`${content}\n`);
+    res.end();
+  } else {
+    res.statusCode = 400;
     res.end();
   }
 });
