@@ -43,12 +43,13 @@ function loanMessage(params) {
   let amount = Number(params.get('amount'));
   let duration = Number(params.get('duration'));
   let monthlyPayment = calculation(amount, duration, APR);
+  let form = '<form action="" method="get"><fieldset><dl><dt><label for="amount"></label>Amount</dt><dd><input type="text" name="amount" required></dd></dl><dl><dt><label for="duration"></label>Duration</dt><dd><input type="text" name="duration" required><input type="submit"></dd></dl></fieldset></form>'
   let content = `<tr><th>Amount:</th><td>$${amount}</td></tr>
                  <tr><th>Duration:</th><td>${duration} years</td></tr>
                  <tr><th>APR:</th><td>${APR}%</td></tr>
                  <tr><th>Monthly payment:</th><td>$${monthlyPayment}</td></tr>`;
 
-  return `${HTML_START}${content}${HTML_END}`;
+  return `${HTML_START}${form}${content}${HTML_END}`;
 
 }
 const SERVER = HTTP.createServer((req, res) => {
