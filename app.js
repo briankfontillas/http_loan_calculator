@@ -1,8 +1,9 @@
 const HTTP = require('http');
 const URL = require('url').URL;
 const PORT = 3000;
+const HANDLEBARS = require('handlebars');
 
-const HTML_START = `
+const SOURCE = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -59,14 +60,44 @@ const HTML_START = `
     <article>
       <h1>Loan Calculator</h1>
       <table>
-        <tbody>`;
-
-const HTML_END = `
-        </tbody>
+        <tbody>
+        <form action="" method="get">
+                <fieldset>
+                  <dl>
+                    <dt><label for="amount">Amount</label></dt>
+                    <dd><input type="text" name="amount" required></dd>
+                  </dl>
+                  <dl>
+                    <dt><label for="duration">Duration</label></dt>
+                    <dd><input type="text" name="duration" required></dd>
+                    <dd><input type="submit"></dd>
+                  </dl>
+                </fieldset>
+              </form></dd>
+              <tr><th>Amount:</th><td>
+                  <a href="/?amount={{amountDecrement}}&duration={{duration}}">-100$</a>
+                  $ {{amount}}
+                  <a href="/?amount={{amountIncrement}}&duration={{duration}}">+100$</a>
+                  </td></tr>
+                 <tr><th>Duration:</th><td>
+                  <a href="/?amount={{amount}}&duration={{durationDecrement}}">-1 year</a>
+                  {{duration}} years
+                  <a href="/?amount={{amount}}&duration={{durationIncrement}}">+1 year</a>
+                  </td></tr>
+                 <tr><th>APR:</th><td>{{APR}}%</td></tr>
+                 <tr><th>Monthly payment:</th><td>$ {{payment}}</td></tr>
+                 </tbody>
       </table>
     </article>
   </body>
 </html>`;
+
+const LOAN_OFFER_TEMPLATE = HANDLEBARS.compile(SOURCE);
+
+function render(template, data) {
+  let html = template(data);
+  return html;
+}
 
 function getParams(path) {
   const myURL = new URL(path, `http://localhost${PORT}`);
@@ -86,43 +117,26 @@ function calculation(amount, duration, apr) {
 
 function loanMessage(params) {
   const APR = 5;
-  let amount = Number(params.get('amount'));
-  let duration = Number(params.get('duration'));
-  let monthlyPayment = calculation(amount, duration, APR);
-  let form = `<form action="" method="get">
-                <fieldset>
-                  <dl>
-                    <dt><label for="amount">Amount</label></dt>
-                    <dd><input type="text" name="amount" required></dd>
-                  </dl>
-                  <dl>
-                    <dt><label for="duration">Duration</label></dt>
-                    <dd><input type="text" name="duration" required></dd>
-                    <dd><input type="submit"></dd>
-                  </dl>
-                </fieldset>
-              </form></dd>`
-  let content = `<tr><th>Amount:</th><td>
-                  <a href="/?amount=${amount - 100}&duration=${duration}">-100$</a>
-                  $${amount}
-                  <a href="/?amount=${amount + 100}&duration=${duration}">+100$</a>
-                  </td></tr>
-                 <tr><th>Duration:</th><td>
-                  <a href="/?amount=${amount}&duration=${duration - 1}">-1 year</a>
-                  ${duration} years
-                  <a href="/?amount=${amount}&duration=${duration + 1}">+1 year</a>
-                  </td></tr>
-                 <tr><th>APR:</th><td>${APR}%</td></tr>
-                 <tr><th>Monthly payment:</th><td>$${monthlyPayment}</td></tr>`;
+  let data = {};
 
-  return `${HTML_START}${form}${content}${HTML_END}`;
+  data.amount = Number(params.get('amount'));
+  data.amountIncrement = data.amount + 100;
+  data.amountDecrement = data.amount - 100;
+  data.duration = Number(params.get('duration'));
+  data.durationIncrement = data.duration + 1;
+  data.durationDecrement = data.duration - 1;
+  data.apr = APR;
+  data.payment = calculation(data.amount, data.duration, APR);
 
+  return data;
 }
 const SERVER = HTTP.createServer((req, res) => {
-  let path = req.url;
+  let path =req.url;
 
   if (path !== '/favicon.ico') {
-    let content = loanMessage(getParams(path))
+    let data = loanMessage(getParams(path))
+    let content = render(LOAN_OFFER_TEMPLATE, data);
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.write(`${content}\n`);
