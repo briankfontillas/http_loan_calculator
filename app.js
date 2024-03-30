@@ -8,6 +8,52 @@ const HTML_START = `
   <head>
     <meta charset="utf-8">
     <title>Loan Calculator</title>
+    <style type="text/css">
+      body {
+        background: rgba(250, 250, 250);
+        font-family: sans-serif;
+        color: rgb(50, 50, 50);
+      }
+
+      article {
+        width: 100%;
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        text-align: center;
+      }
+
+      table {
+        font-size: 2rem;
+      }
+
+      th {
+        text-align: right;
+      }
+
+      fieldset {
+        text-align: left;
+      }
+
+      label {
+        display: inline-block;
+      }
+
+      input {
+        box-sizing: border-box;
+        display: inline-block;
+        margin: 5px 0;
+        width: 80%;
+      }
+
+      a {
+        text-decoration: none;
+      }
+  </style>
   </head>
   <body>
     <article>
@@ -43,9 +89,29 @@ function loanMessage(params) {
   let amount = Number(params.get('amount'));
   let duration = Number(params.get('duration'));
   let monthlyPayment = calculation(amount, duration, APR);
-  let form = '<form action="" method="get"><fieldset><dl><dt><label for="amount"></label>Amount</dt><dd><input type="text" name="amount" required></dd></dl><dl><dt><label for="duration"></label>Duration</dt><dd><input type="text" name="duration" required><input type="submit"></dd></dl></fieldset></form>'
-  let content = `<tr><th>Amount:</th><td>$${amount}</td></tr>
-                 <tr><th>Duration:</th><td>${duration} years</td></tr>
+  let form = `<form action="" method="get">
+                <fieldset>
+                  <dl>
+                    <dt><label for="amount">Amount</label></dt>
+                    <dd><input type="text" name="amount" required></dd>
+                  </dl>
+                  <dl>
+                    <dt><label for="duration">Duration</label></dt>
+                    <dd><input type="text" name="duration" required></dd>
+                    <dd><input type="submit"></dd>
+                  </dl>
+                </fieldset>
+              </form></dd>`
+  let content = `<tr><th>Amount:</th><td>
+                  <a href="/?amount=${amount - 100}&duration=${duration}">-100$</a>
+                  $${amount}
+                  <a href="/?amount=${amount + 100}&duration=${duration}">+100$</a>
+                  </td></tr>
+                 <tr><th>Duration:</th><td>
+                  <a href="/?amount=${amount}&duration=${duration - 1}">-1 year</a>
+                  ${duration} years
+                  <a href="/?amount=${amount}&duration=${duration + 1}">+1 year</a>
+                  </td></tr>
                  <tr><th>APR:</th><td>${APR}%</td></tr>
                  <tr><th>Monthly payment:</th><td>$${monthlyPayment}</td></tr>`;
 
